@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet Tracker - ダイエット記録</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <i data-lucide="activity"></i>
+                <h1>Diet Tracker</h1>
+            </div>
+            <div class="header-actions">
+                <button id="btn-settings" title="設定"><i data-lucide="settings"></i></button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Dashboard Stats -->
+            <section class="dashboard">
+                <div class="card stat-card">
+                    <div class="stat-label">現在の体重</div>
+                    <div class="stat-value"><span id="current-weight">--</span> <small>kg</small></div>
+                    <div class="stat-diff" id="weight-diff">--</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">目標まで</div>
+                    <div class="stat-value"><span id="to-goal">--</span> <small>kg</small></div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="goal-progress"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chart Section -->
+            <section class="chart-container card">
+                <canvas id="weightChart"></canvas>
+            </section>
+
+            <!-- Quick Add Form -->
+            <section class="add-entry card">
+                <h3>体重を記録する</h3>
+                <form id="entry-form">
+                    <div class="form-group">
+                        <label for="weight">体重 (kg)</label>
+                        <input type="number" id="weight" step="0.1" required placeholder="0.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="date">日付</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <button type="submit" class="btn-primary">記録する</button>
+                </form>
+            </section>
+
+            <!-- History List -->
+            <section class="history card">
+                <h3>最近の記録</h3>
+                <div id="history-list" class="history-list">
+                    <!-- Entries will be injected here -->
+                    <div class="empty-state">記録がありません</div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Settings/Goal Modal -->
+        <div id="modal-settings" class="modal">
+            <div class="modal-content card">
+                <div class="modal-header">
+                    <h2>目標設定 & バックアップ</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <form id="goal-form">
+                    <div class="form-group">
+                        <label for="start-weight">開始時の体重 (kg)</label>
+                        <input type="number" id="start-weight" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="target-weight">目標体重 (kg)</label>
+                        <input type="number" id="target-weight" step="0.1" required>
+                    </div>
+                    <button type="submit" class="btn-primary">目標を保存</button>
+                </form>
+                <hr>
+                <div class="backup-actions">
+                    <button id="btn-export" class="btn-secondary">データを書き出す (JSON)</button>
+                    <button id="btn-import-trigger" class="btn-secondary">データを読み込む</button>
+                    <input type="file" id="import-file" style="display: none;" accept=".json">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
