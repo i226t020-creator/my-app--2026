@@ -189,6 +189,12 @@ input:focus {
     font-size: 0.9rem;
 }
 
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
 /* History List */
 .history-list {
     max-height: 300px;
@@ -207,13 +213,18 @@ input:focus {
     border-bottom: none;
 }
 
-.history-info .date {
+.history-info .date-time {
     font-size: 0.85rem;
     color: var(--text-muted);
 }
 
-.history-info .weight {
+.history-info .weight, .history-info .food-desc {
     font-weight: 600;
+}
+
+.history-info .food-desc {
+    display: block;
+    margin-top: 2px;
 }
 
 .btn-delete {

@@ -6,11 +6,13 @@ const STORAGE_KEY = 'diet_tracker_data';
 export const storage = {
     /**
      * Get all data from localStorage
-     * @returns {Object} { entries: [], goal: null }
+     * @returns {Object} { entries: [], foodEntries: [], goal: null }
      */
     getData() {
         const data = localStorage.getItem(STORAGE_KEY);
-        return data ? JSON.parse(data) : { entries: [], goal: null };
+        const parsed = data ? JSON.parse(data) : { entries: [], foodEntries: [], goal: null };
+        if (!parsed.foodEntries) parsed.foodEntries = [];
+        return parsed;
     },
 
     /**
@@ -37,12 +39,41 @@ export const storage = {
     },
 
     /**
-     * Delete an entry by ID
+     * Add a new food entry
+     * @param {Object} entry { food: string, time: string, date: string }
+     */
+    addFoodEntry(entry) {
+        const data = this.getData();
+        data.foodEntries.push({
+            id: Date.now(),
+            ...entry
+        });
+        // Sort by date and time
+        data.foodEntries.sort((a, b) => {
+            const dateComp = new Date(a.date) - new Date(b.date);
+            if (dateComp !== 0) return dateComp;
+            return a.time.localeCompare(b.time);
+        });
+        this.saveData(data);
+    },
+
+    /**
+     * Delete a weight entry by ID
      * @param {number} id 
      */
     deleteEntry(id) {
         const data = this.getData();
         data.entries = data.entries.filter(e => e.id !== id);
+        this.saveData(data);
+    },
+
+    /**
+     * Delete a food entry by ID
+     * @param {number} id 
+     */
+    deleteFoodEntry(id) {
+        const data = this.getData();
+        data.foodEntries = data.foodEntries.filter(e => e.id !== id);
         this.saveData(data);
     },
 
@@ -72,6 +103,7 @@ export const storage = {
         try {
             const data = JSON.parse(jsonString);
             if (data && Array.isArray(data.entries)) {
+                if (!data.foodEntries) data.foodEntries = [];
                 this.saveData(data);
                 return true;
             }

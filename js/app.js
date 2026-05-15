@@ -6,7 +6,9 @@ const weightDiffEl = document.getElementById('weight-diff');
 const toGoalEl = document.getElementById('to-goal');
 const goalProgressEl = document.getElementById('goal-progress');
 const entryForm = document.getElementById('entry-form');
+const foodForm = document.getElementById('food-form');
 const historyList = document.getElementById('history-list');
+const foodHistoryList = document.getElementById('food-history-list');
 const btnSettings = document.getElementById('btn-settings');
 const modalSettings = document.getElementById('modal-settings');
 const closeModal = document.querySelector('.close-modal');
@@ -24,8 +26,15 @@ let weightChart = null;
 function init() {
     const data = storage.getData();
     
-    // Set default date in form to today
-    document.getElementById('date').valueAsDate = new Date();
+    // Set default date in forms to today
+    const now = new Date();
+    document.getElementById('date').valueAsDate = now;
+    document.getElementById('food-date').valueAsDate = now;
+    
+    // Set default time to current time
+    const currentTime = now.getHours().toString().padStart(2, '0') + ':' + 
+                        now.getMinutes().toString().padStart(2, '0');
+    document.getElementById('food-time').value = currentTime;
 
     // Populate goal form if goal exists
     if (data.goal) {
@@ -35,6 +44,7 @@ function init() {
 
     renderDashboard();
     renderHistory();
+    renderFoodHistory();
     initChart();
     setupEventListeners();
 }
@@ -74,7 +84,7 @@ function renderDashboard() {
 }
 
 /**
- * Render history list
+ * Render weight history list
  */
 function renderHistory() {
     const data = storage.getData();
@@ -89,7 +99,7 @@ function renderHistory() {
         <div class="history-item">
             <div class="history-info">
                 <div class="weight">${entry.weight} kg</div>
-                <div class="date">${entry.date}</div>
+                <div class="date-time">${entry.date}</div>
             </div>
             <button class="btn-delete" data-id="${entry.id}">
                 <i data-lucide="trash-2"></i>
@@ -97,16 +107,52 @@ function renderHistory() {
         </div>
     `).join('');
 
-    // Re-initialize icons for newly added elements
-    if (window.lucide) {
-        window.lucide.createIcons();
-    }
+    // Re-initialize icons
+    if (window.lucide) window.lucide.createIcons();
 
     // Add delete listeners
-    document.querySelectorAll('.btn-delete').forEach(btn => {
+    historyList.querySelectorAll('.btn-delete').forEach(btn => {
         btn.onclick = () => {
             if (confirm('この記録を削除しますか？')) {
                 storage.deleteEntry(Number(btn.dataset.id));
+                updateUI();
+            }
+        };
+    });
+}
+
+/**
+ * Render food history list
+ */
+function renderFoodHistory() {
+    const data = storage.getData();
+    const entries = [...data.foodEntries].reverse(); // Show newest first
+
+    if (entries.length === 0) {
+        foodHistoryList.innerHTML = '<div class="empty-state">記録がありません</div>';
+        return;
+    }
+
+    foodHistoryList.innerHTML = entries.map(entry => `
+        <div class="history-item">
+            <div class="history-info">
+                <div class="food-desc">${entry.food}</div>
+                <div class="date-time">${entry.date} ${entry.time}</div>
+            </div>
+            <button class="btn-delete-food" data-id="${entry.id}">
+                <i data-lucide="trash-2"></i>
+            </button>
+        </div>
+    `).join('');
+
+    // Re-initialize icons
+    if (window.lucide) window.lucide.createIcons();
+
+    // Add delete listeners
+    foodHistoryList.querySelectorAll('.btn-delete-food').forEach(btn => {
+        btn.onclick = () => {
+            if (confirm('この記録を削除しますか？')) {
+                storage.deleteFoodEntry(Number(btn.dataset.id));
                 updateUI();
             }
         };
@@ -167,6 +213,7 @@ function initChart() {
 function updateUI() {
     renderDashboard();
     renderHistory();
+    renderFoodHistory();
     initChart();
 }
 
@@ -174,7 +221,7 @@ function updateUI() {
  * Setup event listeners
  */
 function setupEventListeners() {
-    // New entry form
+    // New weight entry form
     entryForm.onsubmit = (e) => {
         e.preventDefault();
         const weight = parseFloat(document.getElementById('weight').value);
@@ -183,6 +230,26 @@ function setupEventListeners() {
         storage.addEntry({ weight, date });
         entryForm.reset();
         document.getElementById('date').valueAsDate = new Date();
+        updateUI();
+    };
+
+    // New food entry form
+    foodForm.onsubmit = (e) => {
+        e.preventDefault();
+        const food = document.getElementById('food-name').value;
+        const time = document.getElementById('food-time').value;
+        const date = document.getElementById('food-date').value;
+
+        storage.addFoodEntry({ food, time, date });
+        foodForm.reset();
+        
+        // Reset defaults
+        const now = new Date();
+        document.getElementById('food-date').valueAsDate = now;
+        const currentTime = now.getHours().toString().padStart(2, '0') + ':' + 
+                            now.getMinutes().toString().padStart(2, '0');
+        document.getElementById('food-time').value = currentTime;
+        
         updateUI();
     };
 
